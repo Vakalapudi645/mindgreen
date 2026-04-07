@@ -1,7 +1,7 @@
 # 🌿 MindGreen — Mental Wellness & Eco Habit Tracker
 
-> **Team Name:** GreenMind Labs  
-> **Developer:** Dhanush  
+> **Reg number:** 22BCT0297 
+> **Developer:** Madhu koushik 
 > **Course:** Web Application Development  
 > **Deployment:** [Live on GitHub Pages](https://your-username.github.io/mindgreen)
 
