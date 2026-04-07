@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resources & Tips — MindGreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1a7a4a; --green-light: #e8f5ee; --green-mid: #2d9e64;
+    --cream: #f9f6f0; --charcoal: #1c2b22; --text: #2c3e30; --muted: #6b7f6e;
+    --border: #d4e4d9; --white: #ffffff; --amber: #e67e22; --sidebar-w: 240px;
+  }
+
+  
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--charcoal); display: flex; flex-direction: column; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+  .sidebar-logo { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: white; padding: 0.5rem 0.8rem; margin-bottom: 2rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.8rem; border-radius: 10px; color: rgba(255,255,255,0.65); font-size: 0.88rem; cursor: pointer; transition: all 0.15s; text-decoration: none; margin-bottom: 2px; }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .nav-item.active { background: var(--green); color: white; }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-section { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); padding: 0.5rem 0.8rem; margin-top: 1rem; margin-bottom: 0.3rem; }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
+  .logout-btn { display: flex; align-items: center; gap: 8px; padding: 0.5rem 0.8rem; color: rgba(255,255,255,0.4); font-size: 0.8rem; cursor: pointer; border-radius: 8px; transition: all 0.15s; border: none; background: none; width: 100%; }
+  .logout-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 2.5rem; }
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--charcoal); margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-size: 0.9rem; }
+
+  .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .tab { padding: 6px 16px; border-radius: 100px; font-size: 0.82rem; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: var(--white); color: var(--muted); transition: all 0.15s; }
+  .tab:hover { border-color: var(--green); color: var(--green); }
+  .tab.active { background: var(--green); color: white; border-color: var(--green); }
+
+  .resources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+  .resource-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; transition: transform 0.2s; }
+  .resource-card:hover { transform: translateY(-2px); }
+  .card-img { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+  .card-img.mental { background: linear-gradient(135deg, #e8f5ee, #c8ebd8); }
+  .card-img.eco { background: linear-gradient(135deg, #e8f5f0, #b8e8d0); }
+  .card-img.science { background: linear-gradient(135deg, #eef3fe, #d0ddf8); }
+  .card-img.habits { background: linear-gradient(135deg, #fef3e6, #fad9a8); }
+  .card-body { padding: 1.2rem 1.3rem; }
+  .card-tag { display: inline-block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 10px; border-radius: 100px; margin-bottom: 8px; }
+  .tag-mental { background: var(--green-light); color: var(--green); }
+  .tag-eco { background: #e8f8ee; color: #0d7a3e; }
+  .tag-science { background: #eef3fe; color: #3557d0; }
+  .tag-habits { background: #fef3e6; color: var(--amber); }
+  .card-title { font-size: 0.95rem; font-weight: 600; color: var(--charcoal); margin-bottom: 6px; line-height: 1.4; }
+  .card-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+  .card-footer { padding: 0.9rem 1.3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .read-time { font-size: 0.72rem; color: var(--muted); }
+  .card-link { font-size: 0.78rem; color: var(--green); font-weight: 600; text-decoration: none; cursor: pointer; }
+
+  .challenge-banner { background: var(--charcoal); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 2rem; }
+  .challenge-icon { font-size: 3rem; flex-shrink: 0; }
+  .challenge-body h2 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: white; margin-bottom: 0.3rem; }
+  .challenge-body p { color: rgba(255,255,255,0.7); font-size: 0.88rem; margin-bottom: 1rem; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.6rem 1.4rem; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+  .btn-white { background: white; color: var(--charcoal); }
+  .btn-white:hover { background: var(--green-light); }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1.5rem; }
+    .challenge-banner { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🌿 MindGreen</div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="checkin.html" class="nav-item"><span class="nav-icon">🧠</span> Wellness Check-in</a>
+  <a href="eco.html" class="nav-item"><span class="nav-icon">🌍</span> Eco Habit Logger</a>
+  <div class="nav-section">Insights</div>
+  <a href="resources.html" class="nav-item active"><span class="nav-icon">📚</span> Resources & Tips</a>
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="localStorage.removeItem('mg_user'); window.location.href='index.html'">⬅ Log out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Resources & tips 📚</h1>
+    <p>Expert-curated articles on mental wellness, eco living, and the science connecting the two.</p>
+  </div>
+
+  <div class="challenge-banner">
+    <div class="challenge-icon">🌱</div>
+    <div class="challenge-body">
+      <h2>This week's eco-wellness challenge</h2>
+      <p>Go screen-free for one hour each evening and spend it outdoors. Studies show this reduces cortisol and increases serotonin. Log your mood before and after!</p>
+      <a href="checkin.html" class="btn btn-white">Log your mood →</a>
+    </div>
+  </div>
+
+  <div class="filter-tabs">
+    <div class="tab active" onclick="filterCards('all', this)">All articles</div>
+    <div class="tab" onclick="filterCards('mental', this)">Mental wellness</div>
+    <div class="tab" onclick="filterCards('eco', this)">Eco living</div>
+    <div class="tab" onclick="filterCards('science', this)">The science</div>
+    <div class="tab" onclick="filterCards('habits', this)">Habit building</div>
+  </div>
+
+  <div class="resources-grid" id="resourcesGrid">
+    <div class="resource-card" data-cat="science">
+      <div class="card-img science">🔬</div>
+      <div class="card-body">
+        <span class="card-tag tag-science">The science</span>
+        <div class="card-title">How nature exposure reduces cortisol by up to 21%</div>
+        <div class="card-desc">Research from the University of Michigan shows that spending 20–30 minutes in a natural setting significantly lowers stress hormone levels.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">5 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="mental">
+      <div class="card-img mental">🧘</div>
+      <div class="card-body">
+        <span class="card-tag tag-mental">Mental wellness</span>
+        <div class="card-title">The 5-4-3-2-1 grounding technique for anxiety</div>
+        <div class="card-desc">A simple, evidence-based mindfulness technique you can do anywhere to interrupt anxiety spirals and bring yourself back to the present moment.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">3 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="eco">
+      <div class="card-img eco">🌿</div>
+      <div class="card-body">
+        <span class="card-tag tag-eco">Eco living</span>
+        <div class="card-title">10 zero-waste swaps that take under 5 minutes to adopt</div>
+        <div class="card-desc">From bamboo toothbrushes to reusable beeswax wraps, these easy swaps reduce your plastic footprint without disrupting your routine.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">4 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="science">
+      <div class="card-img science">🌡️</div>
+      <div class="card-body">
+        <span class="card-tag tag-science">The science</span>
+        <div class="card-title">Climate anxiety is real — and so is eco-therapy</div>
+        <div class="card-desc">Psychologists are increasingly recognising "eco-anxiety" as a genuine condition. Here's what the research says about treating it through action.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">6 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="habits">
+      <div class="card-img habits">⚡</div>
+      <div class="card-body">
+        <span class="card-tag tag-habits">Habit building</span>
+        <div class="card-title">Habit stacking: how to attach eco habits to things you already do</div>
+        <div class="card-desc">James Clear's habit stacking technique is one of the most effective ways to build new behaviours. Here's how to apply it to green living.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">5 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="mental">
+      <div class="card-img mental">😴</div>
+      <div class="card-body">
+        <span class="card-tag tag-mental">Mental wellness</span>
+        <div class="card-title">Why sleep is the single most important mental health lever</div>
+        <div class="card-desc">Matthew Walker's research shows that a single night of poor sleep can reduce positive emotional reactivity by 60%. Here's how to fix your sleep.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">7 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="eco">
+      <div class="card-img eco">🚲</div>
+      <div class="card-body">
+        <span class="card-tag tag-eco">Eco living</span>
+        <div class="card-title">Cycling to work: the mental and physical health data</div>
+        <div class="card-desc">Studies show that cycling commuters report 40% lower stress than car commuters — and save around 1.5kg of CO₂ per day. A genuine win-win.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">4 min read</span><span class="card-link">Read →</span></div>
+    </div>
+    <div class="resource-card" data-cat="habits">
+      <div class="card-img habits">📓</div>
+      <div class="card-body">
+        <span class="card-tag tag-habits">Habit building</span>
+        <div class="card-title">Why journaling for 5 minutes a day changes your brain</div>
+        <div class="card-desc">Expressive writing activates the prefrontal cortex, helping regulate emotional responses. Here's a simple daily journaling framework to try.</div>
+      </div>
+      <div class="card-footer"><span class="read-time">4 min read</span><span class="card-link">Read →</span></div>
+    </div>
+  </div>
+</main>
+
+<script>
+function filterCards(cat, tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  document.querySelectorAll('.resource-card').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) card.style.display = 'block';
+    else card.style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>

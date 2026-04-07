@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco Habit Logger — MindGreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1a7a4a; --green-light: #e8f5ee; --green-mid: #2d9e64;
+    --cream: #f9f6f0; --charcoal: #1c2b22; --text: #2c3e30; --muted: #6b7f6e;
+    --border: #d4e4d9; --white: #ffffff; --error: #c0392b; --amber: #e67e22;
+    --sidebar-w: 240px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--charcoal); display: flex; flex-direction: column; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+  .sidebar-logo { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: white; padding: 0.5rem 0.8rem; margin-bottom: 2rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.8rem; border-radius: 10px; color: rgba(255,255,255,0.65); font-size: 0.88rem; cursor: pointer; transition: all 0.15s; text-decoration: none; margin-bottom: 2px; }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .nav-item.active { background: var(--green); color: white; }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-section { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); padding: 0.5rem 0.8rem; margin-top: 1rem; margin-bottom: 0.3rem; }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
+  .logout-btn { display: flex; align-items: center; gap: 8px; padding: 0.5rem 0.8rem; color: rgba(255,255,255,0.4); font-size: 0.8rem; cursor: pointer; border-radius: 8px; transition: all 0.15s; border: none; background: none; width: 100%; }
+  .logout-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 2.5rem; max-width: 820px; }
+  .page-header { margin-bottom: 1.5rem; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--charcoal); margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-size: 0.9rem; }
+
+  /* CO2 COUNTER */
+  .co2-banner { background: var(--charcoal); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .co2-left { }
+  .co2-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .co2-value { font-family: 'DM Serif Display', serif; font-size: 2.5rem; color: #7ab893; }
+  .co2-unit { font-size: 0.9rem; color: rgba(255,255,255,0.6); }
+  .co2-equiv { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+  .co2-target { text-align: right; }
+  .target-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+  .target-bar-wrap { width: 160px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+  .target-bar-fill { height: 100%; background: var(--green-mid); border-radius: 100px; transition: width 0.5s ease; }
+  .target-pct { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 4px; text-align: right; }
+
+  /* HABIT CARDS */
+  .habits-section h2 { font-size: 1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 1rem; }
+  .habits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+  .habit-card { background: var(--white); border: 2px solid var(--border); border-radius: 14px; padding: 1rem; cursor: pointer; transition: all 0.2s; position: relative; }
+  .habit-card:hover { border-color: var(--sage); transform: translateY(-2px); }
+  .habit-card.selected { border-color: var(--green); background: var(--green-light); }
+  .habit-card .hc-icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .habit-card .hc-name { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .habit-card .hc-co2 { font-size: 0.75rem; color: var(--green); }
+  .habit-card .hc-check { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: white; display: none; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+  .habit-card.selected .hc-check { display: flex; }
+  .habit-error { font-size: 0.78rem; color: var(--error); margin-top: -0.8rem; margin-bottom: 1rem; display: none; }
+  .habit-error.show { display: block; }
+
+  /* FORM CARD */
+  .form-card { background: var(--white); border-radius: 20px; border: 1px solid var(--border); padding: 1.8rem; margin-bottom: 1.5rem; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+  .section-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .section-header h2 { font-size: 1.05rem; font-weight: 600; color: var(--charcoal); }
+  .section-header p { font-size: 0.78rem; color: var(--muted); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { margin-bottom: 1.1rem; }
+  label.field-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .req { color: var(--error); }
+  input[type=number], input[type=text], select, textarea {
+    width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: var(--cream);
+    transition: border-color 0.2s; outline: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); background: var(--white); }
+  input.err, select.err { border-color: var(--error); }
+  .field-error { font-size: 0.75rem; color: var(--error); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+
+  /* WEEKLY TARGET */
+  .target-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .target-card { background: var(--green-light); border-radius: 14px; padding: 1.2rem; }
+  .target-card label.field-label { color: var(--green); }
+  .target-card input { background: white; }
+  .weekly-progress { margin-top: 0.8rem; }
+  .wp-bar { height: 8px; background: rgba(26,122,74,0.15); border-radius: 100px; overflow: hidden; }
+  .wp-fill { height: 100%; background: var(--green); border-radius: 100px; transition: width 0.5s; }
+  .wp-label { font-size: 0.72rem; color: var(--green); margin-top: 4px; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0.8rem 2rem; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--charcoal); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  .submit-area { display: flex; gap: 1rem; align-items: center; }
+
+  .success-banner { display: none; background: var(--green); color: white; border-radius: 16px; padding: 1.5rem 2rem; text-align: center; margin-bottom: 1.5rem; }
+  .success-banner h3 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .success-banner p { font-size: 0.88rem; opacity: 0.9; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1.5rem; }
+    .form-row, .target-section { grid-template-columns: 1fr; }
+    .habits-grid { grid-template-columns: 1fr 1fr; }
+    .co2-banner { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🌿 MindGreen</div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="checkin.html" class="nav-item"><span class="nav-icon">🧠</span> Wellness Check-in</a>
+  <a href="eco.html" class="nav-item active"><span class="nav-icon">🌍</span> Eco Habit Logger</a>
+  <div class="nav-section">Insights</div>
+  <a href="resources.html" class="nav-item"><span class="nav-icon">📚</span> Resources & Tips</a>
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="localStorage.removeItem('mg_user'); window.location.href='index.html'">⬅ Log out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Eco habit logger 🌍</h1>
+    <p>Log today's eco-friendly actions and watch your CO₂ savings add up.</p>
+  </div>
+
+  <div class="co2-banner">
+    <div class="co2-left">
+      <div class="co2-label">CO₂ saved today</div>
+      <div><span class="co2-value" id="co2Display">0</span><span class="co2-unit"> g</span></div>
+      <div class="co2-equiv" id="co2Equiv">Select habits below to see your impact</div>
+    </div>
+    <div class="co2-target">
+      <div class="target-label">Daily target progress</div>
+      <div class="target-bar-wrap"><div class="target-bar-fill" id="targetBar" style="width:0%"></div></div>
+      <div class="target-pct" id="targetPct">0% of 2,000g goal</div>
+    </div>
+  </div>
+
+  <div class="success-banner" id="successBanner">
+    <h3>Eco habits logged! 🌿</h3>
+    <p>Fantastic. Every small action adds up to a healthier planet and a happier you.</p>
+  </div>
+
+  <form id="ecoForm" novalidate>
+    <!-- HABITS -->
+    <div class="habits-section">
+      <h2>Select today's eco actions <span class="req">*</span></h2>
+      <div class="habits-grid" id="habitsGrid">
+        <div class="habit-card" data-habit="Cycled or walked instead of driving" data-co2="1200" onclick="toggleHabit(this)">
+          <div class="hc-icon">🚲</div>
+          <div class="hc-name">Cycled or walked instead of driving</div>
+          <div class="hc-co2">~1,200g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Ate a plant-based meal" data-co2="800" onclick="toggleHabit(this)">
+          <div class="hc-icon">🥗</div>
+          <div class="hc-name">Ate a plant-based meal</div>
+          <div class="hc-co2">~800g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Plastic-free day" data-co2="300" onclick="toggleHabit(this)">
+          <div class="hc-icon">♻️</div>
+          <div class="hc-name">Plastic-free day</div>
+          <div class="hc-co2">~300g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Used reusable bag/bottle" data-co2="150" onclick="toggleHabit(this)">
+          <div class="hc-icon">🧴</div>
+          <div class="hc-name">Used reusable bag/bottle</div>
+          <div class="hc-co2">~150g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Shorter shower (< 5 min)" data-co2="100" onclick="toggleHabit(this)">
+          <div class="hc-icon">🚿</div>
+          <div class="hc-name">Shorter shower (&lt; 5 min)</div>
+          <div class="hc-co2">~100g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Composted food waste" data-co2="200" onclick="toggleHabit(this)">
+          <div class="hc-icon">🪴</div>
+          <div class="hc-name">Composted food waste</div>
+          <div class="hc-co2">~200g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Used public transport" data-co2="600" onclick="toggleHabit(this)">
+          <div class="hc-icon">🚌</div>
+          <div class="hc-name">Used public transport</div>
+          <div class="hc-co2">~600g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+        <div class="habit-card" data-habit="Ate locally sourced food" data-co2="400" onclick="toggleHabit(this)">
+          <div class="hc-icon">🥬</div>
+          <div class="hc-name">Ate locally sourced food</div>
+          <div class="hc-co2">~400g CO₂ saved</div>
+          <div class="hc-check">✓</div>
+        </div>
+      </div>
+      <div class="habit-error" id="habitErr">Please select at least one eco habit.</div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">📋</div>
+        <div>
+          <h2>Additional details</h2>
+          <p>Help us calculate your impact more accurately</p>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label" for="transport">Primary transport today <span class="req">*</span></label>
+          <select id="transport">
+            <option value="">How did you get around?</option>
+            <option>Walked</option>
+            <option>Cycled</option>
+            <option>Public transport</option>
+            <option>Electric vehicle</option>
+            <option>Car (petrol/diesel)</option>
+            <option>Worked from home</option>
+          </select>
+          <div class="field-error" id="transportErr">Please select your transport mode.</div>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="diet">Diet type today</label>
+          <select id="diet">
+            <option value="">Select diet today</option>
+            <option>Fully vegan</option>
+            <option>Mostly plant-based</option>
+            <option>Vegetarian</option>
+            <option>Mixed / omnivore</option>
+            <option>Meat-heavy</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label" for="notes">Notes (optional)</label>
+        <input type="text" id="notes" placeholder="Anything else you did for the planet today?">
+      </div>
+    </div>
+
+    <!-- WEEKLY TARGET -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">🎯</div>
+        <div>
+          <h2>Weekly targets</h2>
+          <p>Set a goal to keep yourself motivated</p>
+        </div>
+      </div>
+      <div class="target-section">
+        <div class="target-card">
+          <label class="field-label" for="weeklyHabits">Habits per week target <span class="req">*</span></label>
+          <input type="number" id="weeklyHabits" min="1" max="56" value="21" placeholder="e.g. 21" oninput="updateWeeklyProgress()">
+          <div class="field-error" id="weeklyErr">Enter a number between 1 and 56.</div>
+          <div class="weekly-progress">
+            <div class="wp-bar"><div class="wp-fill" id="weeklyBar" style="width:30%"></div></div>
+            <div class="wp-label" id="weeklyLabel">7 of 21 this week</div>
+          </div>
+        </div>
+        <div class="target-card">
+          <label class="field-label" for="weeklyCO2">CO₂ saving target (g/week) <span class="req">*</span></label>
+          <input type="number" id="weeklyCO2" min="100" max="50000" value="10000" placeholder="e.g. 10000" oninput="updateCO2Progress()">
+          <div class="field-error" id="co2TargetErr">Enter a value between 100 and 50,000.</div>
+          <div class="weekly-progress">
+            <div class="wp-bar"><div class="wp-fill" id="co2TargetBar" style="width:20%"></div></div>
+            <div class="wp-label" id="co2TargetLabel">2,000g of 10,000g target</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button type="submit" class="btn btn-primary">Save eco log ✓</button>
+      <a href="dashboard.html" class="btn btn-ghost">Back to dashboard</a>
+    </div>
+  </form>
+</main>
+
+<script>
+let selectedHabits = [];
+let totalCO2 = 0;
+
+function toggleHabit(card) {
+  const habit = card.dataset.habit;
+  const co2 = parseInt(card.dataset.co2);
+  if (card.classList.contains('selected')) {
+    card.classList.remove('selected');
+    selectedHabits = selectedHabits.filter(h => h !== habit);
+    totalCO2 -= co2;
+  } else {
+    card.classList.add('selected');
+    selectedHabits.push(habit);
+    totalCO2 += co2;
+  }
+  updateCO2Display();
+}
+
+function updateCO2Display() {
+  document.getElementById('co2Display').textContent = totalCO2.toLocaleString();
+  const pct = Math.min(Math.round(totalCO2 / 2000 * 100), 100);
+  document.getElementById('targetBar').style.width = pct + '%';
+  document.getElementById('targetPct').textContent = pct + '% of 2,000g goal';
+  const equiv = totalCO2 >= 1000 ? `≈ ${(totalCO2/1000).toFixed(1)} km not driven` : `≈ ${Math.round(totalCO2/50)} minutes of TV saved`;
+  document.getElementById('co2Equiv').textContent = totalCO2 > 0 ? equiv : 'Select habits below to see your impact';
+}
+
+function updateWeeklyProgress() {
+  const target = parseInt(document.getElementById('weeklyHabits').value) || 21;
+  const current = 7;
+  const pct = Math.min(Math.round(current / target * 100), 100);
+  document.getElementById('weeklyBar').style.width = pct + '%';
+  document.getElementById('weeklyLabel').textContent = `${current} of ${target} this week`;
+}
+
+function updateCO2Progress() {
+  const target = parseInt(document.getElementById('weeklyCO2').value) || 10000;
+  const current = 2000;
+  const pct = Math.min(Math.round(current / target * 100), 100);
+  document.getElementById('co2TargetBar').style.width = pct + '%';
+  document.getElementById('co2TargetLabel').textContent = `2,000g of ${target.toLocaleString()}g target`;
+}
+
+document.getElementById('ecoForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  let valid = true;
+  if (selectedHabits.length === 0) { document.getElementById('habitErr').classList.add('show'); valid = false; }
+  else document.getElementById('habitErr').classList.remove('show');
+
+  const transport = document.getElementById('transport').value;
+  if (!transport) { document.getElementById('transportErr').classList.add('show'); document.getElementById('transport').classList.add('err'); valid = false; }
+  else { document.getElementById('transportErr').classList.remove('show'); document.getElementById('transport').classList.remove('err'); }
+
+  const weeklyHabits = parseInt(document.getElementById('weeklyHabits').value);
+  if (!weeklyHabits || weeklyHabits < 1 || weeklyHabits > 56) { document.getElementById('weeklyErr').classList.add('show'); document.getElementById('weeklyHabits').classList.add('err'); valid = false; }
+  else { document.getElementById('weeklyErr').classList.remove('show'); document.getElementById('weeklyHabits').classList.remove('err'); }
+
+  const weeklyCO2 = parseInt(document.getElementById('weeklyCO2').value);
+  if (!weeklyCO2 || weeklyCO2 < 100 || weeklyCO2 > 50000) { document.getElementById('co2TargetErr').classList.add('show'); document.getElementById('weeklyCO2').classList.add('err'); valid = false; }
+  else { document.getElementById('co2TargetErr').classList.remove('show'); document.getElementById('weeklyCO2').classList.remove('err'); }
+
+  if (!valid) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const data = { habits: selectedHabits, co2: totalCO2, transport, diet: document.getElementById('diet').value, notes: document.getElementById('notes').value, weeklyHabits, weeklyCO2, timestamp: new Date().toISOString() };
+  localStorage.setItem('mg_eco_' + today, JSON.stringify(data));
+
+  document.getElementById('ecoForm').style.display = 'none';
+  document.getElementById('successBanner').style.display = 'block';
+  setTimeout(() => window.location.href = 'dashboard.html', 2500);
+});
+</script>
+</body>
+</html>

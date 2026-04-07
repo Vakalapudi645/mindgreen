@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — MindGreen</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --green:#1a7a4a;
+  --green-light:#e8f5ee;
+  --cream:#f9f6f0;
+  --text:#2c3e30;
+}
+
+body {
+  font-family:'DM Sans';
+  background:var(--cream);
+  margin:0;
+}
+
+.main {
+  padding:2rem;
+}
+
+/* NAV BUTTONS */
+.nav-bar {
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.nav-btn {
+  padding:8px 14px;
+  border:none;
+  border-radius:10px;
+  background:var(--green);
+  color:white;
+  cursor:pointer;
+}
+
+/* CARD */
+.list-card {
+  background:white;
+  padding:20px;
+  border-radius:16px;
+  margin-top:20px;
+}
+
+/* HABIT TRACKER */
+#habitGrid {
+  display:grid;
+  grid-template-columns:140px repeat(7,36px);
+  gap:8px;
+  margin-top:10px;
+}
+
+.habit-label {
+  font-size:0.8rem;
+}
+
+.habit-cell {
+  width:36px;
+  height:36px;
+  background:var(--green-light);
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.habit-cell.active {
+  background:var(--green);
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="main">
+
+<h2>Dashboard 🌿</h2>
+
+<!-- NAVIGATION -->
+<div class="nav-bar">
+  <a href="checkin.html"><button class="nav-btn">🧠 Check-in</button></a>
+  <a href="eco.html"><button class="nav-btn">🌍 Eco</button></a>
+  <a href="resources.html"><button class="nav-btn">📚 Resources</button></a>
+</div>
+
+<!-- STREAK -->
+<div class="list-card">
+  <h3>🔥 Current Streak: <span id="streakVal">0</span> days</h3>
+</div>
+
+<!-- TODAY PROGRESS -->
+<div class="list-card">
+  <h3>Today's Progress</h3>
+  <p id="todayProgress">0/5 habits completed</p>
+</div>
+
+<!-- HABIT TRACKER -->
+<div class="list-card">
+  <h3>Weekly Habit Tracker</h3>
+  <div id="habitGrid"></div>
+</div>
+
+</div>
+
+<script>
+// HABITS
+const habitList = [
+  "Drink Water 💧",
+  "Exercise 🏃",
+  "Meditation 🧘",
+  "No Plastic ♻️",
+  "Healthy Food 🥗"
+];
+
+// DATE
+function getLast7Days() {
+  let arr = [];
+  let now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    let d = new Date(now);
+    d.setDate(d.getDate() - i);
+    arr.push(d.toISOString().split("T")[0]);
+  }
+  return arr;
+}
+
+const days = getLast7Days();
+
+// STORAGE
+function loadData() {
+  return JSON.parse(localStorage.getItem("mg_habitTracker") || "{}");
+}
+
+function saveData(data) {
+  localStorage.setItem("mg_habitTracker", JSON.stringify(data));
+}
+
+// RENDER GRID
+function renderGrid() {
+  const grid = document.getElementById("habitGrid");
+  const data = loadData();
+  grid.innerHTML = "";
+
+  // Header
+  grid.appendChild(document.createElement("div"));
+  days.forEach(d => {
+    let el = document.createElement("div");
+    el.textContent = d.slice(5);
+    el.style.fontSize = "10px";
+    grid.appendChild(el);
+  });
+
+  // Rows
+  habitList.forEach(habit => {
+    let label = document.createElement("div");
+    label.textContent = habit;
+    label.className = "habit-label";
+    grid.appendChild(label);
+
+    days.forEach(day => {
+      let cell = document.createElement("div");
+      cell.className = "habit-cell";
+
+      if (data[habit] && data[habit][day]) {
+        cell.classList.add("active");
+        cell.textContent = "✓";
+      }
+
+      cell.onclick = () => {
+        if (!data[habit]) data[habit] = {};
+        data[habit][day] = !data[habit][day];
+        saveData(data);
+        renderGrid();
+        updateStreak();
+        updateTodayProgress();
+      };
+
+      grid.appendChild(cell);
+    });
+  });
+}
+
+// STREAK
+function updateStreak() {
+  const data = loadData();
+  let streak = 0;
+  let d = new Date();
+
+  while (true) {
+    let key = d.toISOString().split("T")[0];
+    let done = habitList.some(h => data[h] && data[h][key]);
+
+    if (done) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+
+  document.getElementById("streakVal").textContent = streak;
+  localStorage.setItem("mg_streak", streak);
+}
+
+// TODAY PROGRESS
+function updateTodayProgress() {
+  const data = loadData();
+  const today = new Date().toISOString().split("T")[0];
+
+  let done = 0;
+  habitList.forEach(h => {
+    if (data[h] && data[h][today]) done++;
+  });
+
+  document.getElementById("todayProgress").textContent =
+    `${done}/${habitList.length} habits completed`;
+}
+
+// INIT
+renderGrid();
+updateStreak();
+updateTodayProgress();
+</script>
+
+</body>
+</html>

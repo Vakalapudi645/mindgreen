@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — MindGreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1a7a4a; --green-light: #e8f5ee; --green-mid: #2d9e64; --sage: #7ab893;
+    --cream: #f9f6f0; --charcoal: #1c2b22; --text: #2c3e30; --muted: #6b7f6e;
+    --border: #d4e4d9; --white: #ffffff; --error: #c0392b; --amber: #e67e22;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+
+  .left-panel { background: var(--green); display: flex; flex-direction: column; justify-content: center; padding: 4rem 3rem; position: relative; overflow: hidden; }
+  .left-panel::before { content: ''; position: absolute; width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%; top: -100px; left: -100px; }
+  .left-panel::after { content: ''; position: absolute; width: 300px; height: 300px; background: rgba(255,255,255,0.05); border-radius: 50%; bottom: -50px; right: -50px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; margin-bottom: 3rem; transition: color 0.2s; }
+  .back-link:hover { color: white; }
+  .panel-logo { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: white; margin-bottom: 3rem; }
+  .panel-heading { font-family: 'DM Serif Display', serif; font-size: 2.8rem; color: white; line-height: 1.2; margin-bottom: 1rem; }
+  .panel-heading em { opacity: 0.7; font-style: italic; }
+  .panel-sub { color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2.5rem; }
+  .benefits { display: flex; flex-direction: column; gap: 12px; }
+  .benefit { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.9); font-size: 0.88rem; }
+  .benefit-dot { width: 8px; height: 8px; background: var(--sage); border-radius: 50%; flex-shrink: 0; }
+
+  .right-panel { padding: 3rem 3rem; overflow-y: auto; max-height: 100vh; }
+  .form-header { margin-bottom: 2rem; }
+  .form-header h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--charcoal); margin-bottom: 0.3rem; }
+  .form-header p { color: var(--muted); font-size: 0.88rem; }
+  .step-indicator { display: flex; gap: 6px; margin-bottom: 2rem; }
+  .step-dot { height: 4px; border-radius: 100px; background: var(--border); flex: 1; transition: background 0.3s; }
+  .step-dot.active { background: var(--green); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { margin-bottom: 1.1rem; }
+  label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  label .required { color: var(--error); margin-left: 2px; }
+  input[type=text], input[type=email], input[type=password], select, textarea {
+    width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+  input.err, select.err { border-color: var(--error); }
+  .field-error { font-size: 0.75rem; color: var(--error); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+  .field-hint { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  .password-strength { margin-top: 6px; }
+  .strength-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+  .strength-bar { height: 4px; flex: 1; border-radius: 100px; background: var(--border); transition: background 0.3s; }
+  .strength-bar.weak { background: var(--error); }
+  .strength-bar.medium { background: var(--amber); }
+  .strength-bar.strong { background: var(--green); }
+  .strength-label { font-size: 0.72rem; color: var(--muted); }
+
+  .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+  .checkbox-item { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .checkbox-item input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--green); flex-shrink: 0; cursor: pointer; }
+  .checkbox-item span { font-size: 0.85rem; color: var(--text); }
+  .checkbox-item span a { color: var(--green); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0.85rem 1.5rem; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; width: 100%; }
+  .btn-primary { background: var(--green); color: white; border-color: var(--green); }
+  .btn-primary:hover { background: var(--charcoal); border-color: var(--charcoal); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .section-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 1.5rem 0 0.8rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+  .sign-in-link { text-align: center; font-size: 0.84rem; color: var(--muted); margin-top: 1rem; }
+  .sign-in-link a { color: var(--green); text-decoration: none; font-weight: 600; }
+  .success-msg { display: none; text-align: center; padding: 2rem; }
+  .success-msg .checkmark { font-size: 3rem; margin-bottom: 1rem; }
+  .success-msg h3 { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--charcoal); margin-bottom: 0.5rem; }
+  .success-msg p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+  @media (max-width: 768px) {
+    body { grid-template-columns: 1fr; }
+    .left-panel { display: none; }
+    .right-panel { padding: 2rem 1.5rem; max-height: none; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <a href="index.html" class="back-link">← Back to home</a>
+  <div class="panel-logo">🌿 MindGreen</div>
+  <div class="panel-heading">Start your<br><em>green wellness</em><br>journey today.</div>
+  <p class="panel-sub">Join thousands who've discovered that taking care of the planet and taking care of your mind go hand in hand.</p>
+  <div class="benefits">
+    <div class="benefit"><div class="benefit-dot"></div>Free daily wellness check-ins</div>
+    <div class="benefit"><div class="benefit-dot"></div>Track your eco habits and CO₂ savings</div>
+    <div class="benefit"><div class="benefit-dot"></div>Personalized mood + eco correlation charts</div>
+    <div class="benefit"><div class="benefit-dot"></div>Streak system and achievement badges</div>
+    <div class="benefit"><div class="benefit-dot"></div>Tips and resources from wellness experts</div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="form-header">
+    <h2>Create your account</h2>
+    <p>Fill in your details to get started — it takes less than 2 minutes.</p>
+  </div>
+  <div class="step-indicator">
+    <div class="step-dot active" id="s1"></div>
+    <div class="step-dot" id="s2"></div>
+    <div class="step-dot" id="s3"></div>
+  </div>
+
+  <form id="registerForm" novalidate>
+    <!-- STEP 1: Basic Info -->
+    <div class="section-title" style="border-top:none;padding-top:0">Personal information</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="fname">First name <span class="required">*</span></label>
+        <input type="text" id="fname" placeholder="Dhanush">
+        <div class="field-error" id="fnameErr">First name is required.</div>
+      </div>
+      <div class="form-group">
+        <label for="lname">Last name <span class="required">*</span></label>
+        <input type="text" id="lname" placeholder="Kumar">
+        <div class="field-error" id="lnameErr">Last name is required.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="email">Email address <span class="required">*</span></label>
+      <input type="email" id="email" placeholder="you@example.com">
+      <div class="field-error" id="emailErr">Please enter a valid email address.</div>
+    </div>
+    <div class="form-group">
+      <label for="age">Age range <span class="required">*</span></label>
+      <select id="age">
+        <option value="">Select your age range</option>
+        <option>Under 18</option>
+        <option>18–24</option>
+        <option>25–34</option>
+        <option>35–44</option>
+        <option>45–54</option>
+        <option>55+</option>
+      </select>
+      <div class="field-error" id="ageErr">Please select your age range.</div>
+    </div>
+
+    <!-- STEP 2: Password -->
+    <div class="section-title">Security</div>
+    <div class="form-group">
+      <label for="pass">Password <span class="required">*</span></label>
+      <input type="password" id="pass" placeholder="Create a strong password" oninput="checkStrength(this.value)">
+      <div class="password-strength">
+        <div class="strength-bars">
+          <div class="strength-bar" id="bar1"></div>
+          <div class="strength-bar" id="bar2"></div>
+          <div class="strength-bar" id="bar3"></div>
+          <div class="strength-bar" id="bar4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel">Enter a password</div>
+      </div>
+      <div class="field-error" id="passErr">Password must be at least 8 characters with one number and one uppercase letter.</div>
+    </div>
+    <div class="form-group">
+      <label for="confirmPass">Confirm password <span class="required">*</span></label>
+      <input type="password" id="confirmPass" placeholder="Repeat your password">
+      <div class="field-error" id="confirmErr">Passwords do not match.</div>
+    </div>
+
+    <!-- STEP 3: Wellness Goals -->
+    <div class="section-title">Your wellness goals</div>
+    <div class="form-group">
+      <label for="goal">Primary wellness goal <span class="required">*</span></label>
+      <select id="goal">
+        <option value="">What do you want to improve?</option>
+        <option>Reduce stress and anxiety</option>
+        <option>Improve sleep quality</option>
+        <option>Build eco-friendly habits</option>
+        <option>Track my mood patterns</option>
+        <option>Increase daily mindfulness</option>
+        <option>All of the above</option>
+      </select>
+      <div class="field-error" id="goalErr">Please select a wellness goal.</div>
+    </div>
+    <div class="form-group">
+      <label>How did you hear about MindGreen?</label>
+      <select id="referral">
+        <option value="">Select an option</option>
+        <option>Social media</option>
+        <option>Friend or family</option>
+        <option>Search engine</option>
+        <option>News article</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Terms & Privacy <span class="required">*</span></label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" id="terms">
+          <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="newsletter">
+          <span>Send me weekly wellness tips and eco challenges (optional)</span>
+        </label>
+      </div>
+      <div class="field-error" id="termsErr">You must accept the Terms of Service.</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create my account →</button>
+    <div class="sign-in-link">Already have an account? <a href="index.html">Log in</a></div>
+  </form>
+
+  <div class="success-msg" id="successMsg">
+    <div class="checkmark">🌿</div>
+    <h3>Welcome to MindGreen!</h3>
+    <p>Your account has been created. Let's set up your first wellness check-in.</p>
+    <a href="dashboard.html" class="btn btn-primary">Go to dashboard →</a>
+  </div>
+</div>
+
+<script>
+function checkStrength(val) {
+  const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+  const label = document.getElementById('strengthLabel');
+  bars.forEach(b => { b.className = 'strength-bar'; });
+  if (val.length === 0) { label.textContent = 'Enter a password'; return; }
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  for (let i = 0; i < score; i++) bars[i].classList.add(cls);
+  label.textContent = labels[score] || 'Weak';
+  label.style.color = score <= 1 ? 'var(--error)' : score <= 2 ? 'var(--amber)' : 'var(--green)';
+}
+
+function setErr(id, errId, show) {
+  document.getElementById(id).classList.toggle('err', show);
+  document.getElementById(errId).classList.toggle('show', show);
+}
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  let valid = true;
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passRe = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const age = document.getElementById('age').value;
+  const pass = document.getElementById('pass').value;
+  const confirmPass = document.getElementById('confirmPass').value;
+  const goal = document.getElementById('goal').value;
+  const terms = document.getElementById('terms').checked;
+
+  if (!fname) { setErr('fname','fnameErr',true); valid=false; } else setErr('fname','fnameErr',false);
+  if (!lname) { setErr('lname','lnameErr',true); valid=false; } else setErr('lname','lnameErr',false);
+  if (!emailRe.test(email)) { setErr('email','emailErr',true); valid=false; } else setErr('email','emailErr',false);
+  if (!age) { setErr('age','ageErr',true); valid=false; } else setErr('age','ageErr',false);
+  if (!passRe.test(pass)) { setErr('pass','passErr',true); valid=false; } else setErr('pass','passErr',false);
+  if (pass !== confirmPass) { setErr('confirmPass','confirmErr',true); valid=false; } else setErr('confirmPass','confirmErr',false);
+  if (!goal) { setErr('goal','goalErr',true); valid=false; } else setErr('goal','goalErr',false);
+  if (!terms) { document.getElementById('termsErr').classList.add('show'); valid=false; } else document.getElementById('termsErr').classList.remove('show');
+
+  // Animate step dots
+  document.getElementById('s2').classList.add('active');
+  document.getElementById('s3').classList.add('active');
+
+  if (valid) {
+    localStorage.setItem('mg_user', JSON.stringify({ name: fname + ' ' + lname, email, goal, age }));
+    localStorage.setItem('mg_streak', '0');
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

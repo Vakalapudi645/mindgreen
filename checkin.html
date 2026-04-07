@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wellness Check-in — MindGreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1a7a4a; --green-light: #e8f5ee; --green-mid: #2d9e64;
+    --cream: #f9f6f0; --charcoal: #1c2b22; --text: #2c3e30; --muted: #6b7f6e;
+    --border: #d4e4d9; --white: #ffffff; --error: #c0392b; --amber: #e67e22;
+    --sidebar-w: 240px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--charcoal); display: flex; flex-direction: column; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+  .sidebar-logo { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: white; padding: 0.5rem 0.8rem; margin-bottom: 2rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.8rem; border-radius: 10px; color: rgba(255,255,255,0.65); font-size: 0.88rem; cursor: pointer; transition: all 0.15s; text-decoration: none; margin-bottom: 2px; }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .nav-item.active { background: var(--green); color: white; }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-section { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); padding: 0.5rem 0.8rem; margin-top: 1rem; margin-bottom: 0.3rem; }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
+  .logout-btn { display: flex; align-items: center; gap: 8px; padding: 0.5rem 0.8rem; color: rgba(255,255,255,0.4); font-size: 0.8rem; cursor: pointer; border-radius: 8px; transition: all 0.15s; margin-top: 4px; border: none; background: none; width: 100%; }
+  .logout-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 2.5rem; max-width: 780px; }
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--charcoal); margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-size: 0.9rem; }
+  .already-done { background: var(--green-light); border: 1px solid #a3d5b4; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; display: none; }
+  .already-done h3 { color: var(--green); font-size: 1rem; margin-bottom: 0.3rem; }
+  .already-done p { color: var(--muted); font-size: 0.85rem; }
+
+  .form-card { background: var(--white); border-radius: 20px; border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+  .section-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .section-header h2 { font-size: 1.05rem; font-weight: 600; color: var(--charcoal); }
+  .section-header p { font-size: 0.78rem; color: var(--muted); }
+
+  /* SLIDERS */
+  .slider-group { margin-bottom: 1.5rem; }
+  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .slider-label label { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+  .slider-val { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--green); min-width: 40px; text-align: right; }
+  input[type=range] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 100px; background: var(--border); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--green); box-shadow: 0 2px 6px rgba(26,122,74,0.3); transition: transform 0.15s; }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .range-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+  .slider-emoji { text-align: center; font-size: 1.5rem; margin-top: 4px; }
+
+  /* MOOD PICKER */
+  .mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .mood-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 12px; border: 2px solid var(--border); background: var(--cream); cursor: pointer; transition: all 0.15s; }
+  .mood-btn:hover { border-color: var(--green); background: var(--green-light); }
+  .mood-btn.selected { border-color: var(--green); background: var(--green-light); }
+  .mood-btn .emoji { font-size: 1.5rem; }
+  .mood-btn .mood-label { font-size: 0.68rem; color: var(--muted); text-align: center; }
+
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 1.2rem; }
+  label.field-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  label.field-label .req { color: var(--error); }
+  input[type=number], select, textarea {
+    width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: var(--cream);
+    transition: border-color 0.2s; outline: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); background: var(--white); }
+  input.err, select.err, textarea.err { border-color: var(--error); }
+  .field-error { font-size: 0.75rem; color: var(--error); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+  textarea { resize: vertical; min-height: 100px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .char-count { font-size: 0.72rem; color: var(--muted); text-align: right; margin-top: 3px; }
+
+  .submit-area { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0.8rem 2rem; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--charcoal); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+  .success-banner { display: none; background: var(--green); color: white; border-radius: 16px; padding: 1.5rem 2rem; text-align: center; margin-bottom: 1.5rem; animation: slideDown 0.3s ease; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .success-banner h3 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .success-banner p { font-size: 0.88rem; opacity: 0.9; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .mood-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">🌿 MindGreen</div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="checkin.html" class="nav-item active"><span class="nav-icon">🧠</span> Wellness Check-in</a>
+  <a href="eco.html" class="nav-item"><span class="nav-icon">🌍</span> Eco Habit Logger</a>
+  <div class="nav-section">Insights</div>
+  <a href="resources.html" class="nav-item"><span class="nav-icon">📚</span> Resources & Tips</a>
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="localStorage.removeItem('mg_user'); window.location.href='index.html'">⬅ Log out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Daily wellness check-in 🧠</h1>
+    <p>Take 2 minutes to reflect on how you're feeling today. Consistency builds insight.</p>
+  </div>
+
+  <div class="success-banner" id="successBanner">
+    <h3>Check-in saved! 🌿</h3>
+    <p>Great job showing up for yourself today. Head back to your dashboard to see your updated trends.</p>
+  </div>
+
+  <div class="already-done" id="alreadyDone">
+    <h3>✓ You've already checked in today!</h3>
+    <p>Come back tomorrow to keep your streak going. You can view today's data on your dashboard.</p>
+  </div>
+
+  <form id="checkinForm" novalidate>
+    <!-- MOOD -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">😊</div>
+        <div>
+          <h2>How are you feeling?</h2>
+          <p>Select the emoji that best matches your mood right now</p>
+        </div>
+      </div>
+      <div class="mood-grid">
+        <button type="button" class="mood-btn" data-mood="2" onclick="selectMood(2)"><div class="emoji">😔</div><div class="mood-label">Very low</div></button>
+        <button type="button" class="mood-btn" data-mood="4" onclick="selectMood(4)"><div class="emoji">😕</div><div class="mood-label">Low</div></button>
+        <button type="button" class="mood-btn" data-mood="6" onclick="selectMood(6)"><div class="emoji">😐</div><div class="mood-label">Okay</div></button>
+        <button type="button" class="mood-btn" data-mood="8" onclick="selectMood(8)"><div class="emoji">😊</div><div class="mood-label">Good</div></button>
+        <button type="button" class="mood-btn" data-mood="10" onclick="selectMood(10)"><div class="emoji">😁</div><div class="mood-label">Amazing</div></button>
+      </div>
+      <div class="field-error show" id="moodPickErr" style="display:none">Please select a mood.</div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <label>Mood score (fine-tune)</label>
+          <span class="slider-val" id="moodSliderVal">6</span>
+        </div>
+        <input type="range" id="moodSlider" min="1" max="10" value="6" step="0.5" oninput="updateSlider('moodSlider','moodSliderVal', getMoodEmoji)">
+        <div class="range-labels"><span>1 — Terrible</span><span>10 — Fantastic</span></div>
+      </div>
+    </div>
+
+    <!-- SLEEP & STRESS -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">😴</div>
+        <div>
+          <h2>Sleep & stress levels</h2>
+          <p>Honest tracking leads to better insights</p>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <label>Hours of sleep last night <span style="color:var(--error)">*</span></label>
+          <span class="slider-val" id="sleepVal">7</span>
+        </div>
+        <input type="range" id="sleepSlider" min="0" max="12" value="7" step="0.5" oninput="updateSlider('sleepSlider','sleepVal')">
+        <div class="range-labels"><span>0h</span><span>12h</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <label>Stress level today <span style="color:var(--error)">*</span></label>
+          <span class="slider-val" id="stressVal">4</span>
+        </div>
+        <input type="range" id="stressSlider" min="1" max="10" value="4" step="1" oninput="updateSlider('stressSlider','stressVal')">
+        <div class="range-labels"><span>1 — No stress</span><span>10 — Very stressed</span></div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <label>Energy level <span style="color:var(--error)">*</span></label>
+          <span class="slider-val" id="energyVal">6</span>
+        </div>
+        <input type="range" id="energySlider" min="1" max="10" value="6" step="1" oninput="updateSlider('energySlider','energyVal')">
+        <div class="range-labels"><span>1 — Exhausted</span><span>10 — Energised</span></div>
+      </div>
+    </div>
+
+    <!-- JOURNAL -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">📓</div>
+        <div>
+          <h2>Journal entry</h2>
+          <p>A few words about your day — optional but encouraged</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label" for="journal">What's on your mind today?</label>
+        <textarea id="journal" placeholder="Write freely — this is private and just for you. What happened today? How did it make you feel?" maxlength="500" oninput="updateCharCount()"></textarea>
+        <div class="char-count"><span id="charCount">0</span>/500</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label" for="activity">Physical activity today</label>
+          <select id="activity">
+            <option value="">Select level</option>
+            <option>None</option>
+            <option>Light (walk, stretching)</option>
+            <option>Moderate (30 min workout)</option>
+            <option>Intense (gym, run, sport)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="social">Social interaction today</label>
+          <select id="social">
+            <option value="">Select level</option>
+            <option>Isolated / alone</option>
+            <option>Minimal</option>
+            <option>Some connection</option>
+            <option>Very social</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label" for="gratitude">One thing you're grateful for today <span class="req">*</span></label>
+        <input type="text" id="gratitude" placeholder="e.g. The sunshine this morning, a kind message from a friend...">
+        <div class="field-error" id="gratitudeErr">Please share one thing you're grateful for.</div>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button type="submit" class="btn btn-primary">Save today's check-in ✓</button>
+      <a href="dashboard.html" class="btn btn-ghost">Back to dashboard</a>
+    </div>
+  </form>
+</main>
+
+<script>
+let selectedMood = 6;
+function selectMood(val) {
+  selectedMood = val;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector(`.mood-btn[data-mood="${val}"]`).classList.add('selected');
+  document.getElementById('moodSlider').value = val;
+  document.getElementById('moodSliderVal').textContent = val;
+}
+function updateSlider(sliderId, valId) {
+  const val = parseFloat(document.getElementById(sliderId).value);
+  document.getElementById(valId).textContent = val;
+  if (sliderId === 'moodSlider') selectedMood = val;
+}
+function updateCharCount() {
+  document.getElementById('charCount').textContent = document.getElementById('journal').value.length;
+}
+
+// Check if already checked in today
+const today = new Date().toISOString().split('T')[0];
+const existing = JSON.parse(localStorage.getItem('mg_checkin_' + today) || 'null');
+if (existing) {
+  document.getElementById('alreadyDone').style.display = 'block';
+}
+
+document.getElementById('checkinForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  let valid = true;
+  const gratitude = document.getElementById('gratitude').value.trim();
+  if (!gratitude) {
+    document.getElementById('gratitudeErr').classList.add('show');
+    document.getElementById('gratitude').classList.add('err');
+    valid = false;
+  } else {
+    document.getElementById('gratitudeErr').classList.remove('show');
+    document.getElementById('gratitude').classList.remove('err');
+  }
+  if (!valid) return;
+
+  const data = {
+    mood: parseFloat(document.getElementById('moodSlider').value),
+    sleep: parseFloat(document.getElementById('sleepSlider').value),
+    stress: parseInt(document.getElementById('stressSlider').value),
+    energy: parseInt(document.getElementById('energySlider').value),
+    journal: document.getElementById('journal').value,
+    activity: document.getElementById('activity').value,
+    social: document.getElementById('social').value,
+    gratitude,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('mg_checkin_' + today, JSON.stringify(data));
+
+  // Update streak
+  const yday = new Date(); yday.setDate(yday.getDate() - 1);
+  const ydayKey = yday.toISOString().split('T')[0];
+  const hadYday = localStorage.getItem('mg_checkin_' + ydayKey);
+  let streak = parseInt(localStorage.getItem('mg_streak') || '0');
+  streak = hadYday ? streak + 1 : 1;
+  localStorage.setItem('mg_streak', streak);
+
+  document.getElementById('checkinForm').style.display = 'none';
+  document.getElementById('successBanner').style.display = 'block';
+  setTimeout(() => window.location.href = 'dashboard.html', 2500);
+});
+
+// Pre-select mood 6
+document.querySelector('.mood-btn[data-mood="6"]').classList.add('selected');
+</script>
+</body>
+</html>
